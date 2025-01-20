@@ -15,4 +15,8 @@ pip install bs4
 pip install requests
 ```
 
-本项目采用`GNU General Public License v3.0`证书
+本项目采用`GNU General Public License v3.0`证书  
+
+效果:
+![[screen-term.png]]
+![[screen-obsi.png]]
