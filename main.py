@@ -11,7 +11,7 @@ reset = '\033[0m'
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
 
-def get_title_up_name(bvid):
+def get_title_up_name_pic(bvid):
     try:
         r = requests.get(f'https://api.bilibili.com/x/web-interface/view?bvid={bvid}', headers=headers)
         r.raise_for_status()
@@ -19,7 +19,8 @@ def get_title_up_name(bvid):
         title = data['title']
         title = title.replace("/", "").replace("\\", "").replace("?", "").replace("*", "").replace(":", "").replace("\"", "").replace("<", "").replace(">", "").replace("|", "")
         up = data['owner']['name']
-        return title, up
+        pic = data['pic']
+        return title, up, pic
     except requests.exceptions.RequestException as e:
         print(f"{red}请求错误: {e}{reset}")
         return None, None
@@ -42,12 +43,12 @@ def get_tags_info(bvid):
         return tagList, info_text
     except requests.exceptions.RequestException as e:
         print(f"{red}请求错误: {e}{reset}")
-        return [], ""
+        return [], "", ""
     except Exception as e:
         print(f"{red}未知错误: {e}{reset}")
-        return [], ""
+        return [], "", ""
 
-def write_to_file(bvid, title, up, tagList, info_text):
+def write_to_file(bvid, title, up, tagList, info_text,pic):
     try:
         with open(f'{title}.md', mode="w", encoding="utf-8") as f:
             f.write("---\n")
@@ -57,6 +58,7 @@ def write_to_file(bvid, title, up, tagList, info_text):
             for tag in tagList:
                 f.write(f"  - {tag}\n")
             f.write("---\n\n")
+            f.write(f"![{title}]({pic})\n\n")
             f.write(f"[{title}](https://www.bilibili.com/video/{bvid})\n\n")
             f.write(f"> [!简介]\n> {info_text}")
     except IOError as e:
@@ -64,10 +66,9 @@ def write_to_file(bvid, title, up, tagList, info_text):
 if __name__ == '__main__':
     while True:
         bvid = str(input('请输入BV号> '))
-        title, up = get_title_up_name(bvid)
-        if not title or not up:
+        title, up, pic = get_title_up_name_pic(bvid)
+        if not title or not up or not pic:
             continue
         tagList, info_text = get_tags_info(bvid)
-        write_to_file(bvid, title, up, tagList, info_text)
-        
+        write_to_file(bvid, title, up, tagList, info_text,pic)
         print(f"{green}已成功生成{reset}{yellow}{title}.md{reset}")
